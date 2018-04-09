@@ -15,6 +15,15 @@ const ARRAY_FOO_BAR = {
         { bar: 3 }
     ]
 }
+const ARRAY_FOO_BAR_BAZ = {
+    foo: {
+        bar: [
+            { baz: 1 },
+            { baz: 2 },
+            { baz: 3 }
+        ]
+    }
+}
 
 describe('json2json', () => {
     describe('string template', () => {
@@ -227,6 +236,17 @@ describe('json2json', () => {
                         1, 2, 3
                     ]
                 }
+            });
+        });
+        it('should match deep arrayed result', () => {
+            assert.deepEqual(json2json(ARRAY_FOO_BAR_BAZ, {
+                new_foo: 'foo.bar[].baz'
+            }), {
+                new_foo: [
+                    1,
+                    2,
+                    3
+                ]
             });
         });
     });

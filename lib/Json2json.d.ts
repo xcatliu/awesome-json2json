@@ -1,7 +1,7 @@
 export declare type TypeTemplate = IFullTemplate | string | Function;
 export interface IFullTemplate {
-    $path: string;
-    $formatting: Function;
+    $path?: string;
+    $formatting?: Function;
     [propName: string]: TypeTemplate;
 }
 export default class Json2json {

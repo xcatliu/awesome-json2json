@@ -1,8 +1,8 @@
 export type TypeTemplate = IFullTemplate | string | Function;
 
 export interface IFullTemplate {
-    $path: string;
-    $formatting: Function;
+    $path?: string;
+    $formatting?: Function;
     [propName: string]: TypeTemplate;
 }
 
@@ -81,19 +81,19 @@ export default class Json2json {
             return this.getPropertySafely(this.root, splitedPath.join('.'));
         }
         let result = json;
-        for (let i = 0; i < splitedPath.length; i++) {
-            if (/\[\]$/.test(splitedPath[i])) {
-                const currentKey = splitedPath[i].replace(/\[\]$/, '');
+        while (splitedPath.length > 0) {
+            let currentKey = splitedPath.shift();
+            if (/\[\]$/.test(currentKey)) {
+                currentKey = currentKey.replace(/\[\]$/, '');
                 result = currentKey === '' ? result : result[currentKey];
-                splitedPath.shift();
                 const joinedPath = splitedPath.join('.');
                 return result.map((jsonItem) => {
                     return this.getPropertySafely(jsonItem, joinedPath);
                 });
             }
-            const currentKey = splitedPath[i].replace(/\?$/, '');
-            if (/\?$/.test(splitedPath[i])) {
-                if (typeof json[currentKey] === 'undefined') {
+            if (/\?$/.test(currentKey)) {
+                currentKey = currentKey.replace(/\?$/, '');
+                if (typeof result[currentKey] === 'undefined') {
                     return undefined;
                 }
             }
