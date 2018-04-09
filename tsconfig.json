@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "sourceMap": true,
+        // 是否允许推断为 any 类型
+        "noImplicitAny": false,
+        "module": "commonjs",
+        "target": "es5",
+        "jsx": "react",
+        "outDir": "lib"
+    },
+    "include": [
+        "src/**/*"
+    ]
+}
