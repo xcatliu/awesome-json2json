@@ -1,17 +1,17 @@
-export type TypeTemplate = IFullTemplate | string | Function;
+export type Template<T> = IFullTemplate<T> | string | Function;
 
-export interface IFullTemplate {
+export interface IFullTemplate<T> {
     $path?: string;
     $formatting?: Function;
-    [propName: string]: TypeTemplate;
+    [propName: string]: Template<T>;
 }
 
-export default class Json2json {
+export default class Json2json<T> {
     private static PATH_SEPARATOR = '.';
     private static PATH_ROOT = '$root';
-    private template: TypeTemplate;
+    private template: Template<T>;
     private root: any;
-    constructor(template: TypeTemplate) {
+    constructor(template: Template<T>) {
         this.template = template;
     }
     public map(json: any) {
@@ -19,7 +19,7 @@ export default class Json2json {
 
         return this.mapChild(json, this.template);
     }
-    private mapChild(json: any, template: TypeTemplate) {
+    private mapChild(json: any, template: Template<T>): T {
         const fullTemplate = this.getFullTemplate(template);
         let currentJSON = json;
         currentJSON = this.getPropertySafely(currentJSON, fullTemplate.$path);
@@ -50,10 +50,10 @@ export default class Json2json {
         filteredKeys.forEach((key) => {
             result[key] = this.mapChild(currentJSON, fullTemplate[key]);
         });
-        return result;
+        return (result as T);
     }
-    private getFullTemplate(template: TypeTemplate) {
-        let fullTemplate: IFullTemplate = {
+    private getFullTemplate(template: Template<T>) {
+        let fullTemplate: IFullTemplate<T> = {
             $path: '',
             $formatting: null
         };
