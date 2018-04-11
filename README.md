@@ -88,7 +88,7 @@ Template is the structure of our output json, and the rule of how to map one jso
 
 ### Optional chaining
 
-Optional chaining is a stage-1 ECMAScript feature, by adding a `?` to the end of one pathItem, it will return undefined if the value is undefined, which will throw an error without optional chaining question mark.
+Optional chaining is a [stage-1 ECMAScript feature](https://github.com/tc39/proposal-optional-chaining), by adding a `?` to the end of one pathItem, it will return `undefined` if the value is `undefined`. As a comparison, it will throw an error without optional chaining question mark.
 
 ```js
 json2json({ foo: { bar: { baz: 1 }}}, {
