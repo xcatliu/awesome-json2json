@@ -58,7 +58,7 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 // { new_foo: '1_formatted' }
 ```
 
-### Template with nested template
+### Nested template
 
 ```js
 json2json({ foo: { bar: { baz: 1 }}}, {
@@ -70,7 +70,7 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 // { new_foo: { new_bar: 1 }}
 ```
 
-### Template with nested template with $path and $formatting
+### Nested template with $path and $formatting
 
 ```js
 json2json({ foo: { bar: { baz: 1 }}}, {
@@ -85,6 +85,28 @@ json2json({ foo: { bar: { baz: 1 }}}, {
     }
 });
 // { new_foo: { new_bar: '1_formatted' }}
+```
+
+### Nested template with $disable
+
+```js
+json2json({ foo: { bar: { baz: 1 }}}, {
+    new_foo: {
+        $path: 'foo',
+        new_bar1: {
+            $disable: (foo) => {
+                return foo.bar.baz === 1;
+            },
+            new_baz: 'bar.baz'
+        },
+        new_bar2: 'bar.baz'
+    }
+});
+// {                
+//     new_foo: {
+//         new_bar2: 1
+//     }
+// }
 ```
 
 ### Template with $root
@@ -127,7 +149,7 @@ json2json({
 // { new_foo: [1, 2, 3] }
 ```
 
-### Array template with formatting
+### Array template with $formatting
 
 ```js
 json2json({
@@ -151,7 +173,7 @@ json2json({
 // }
 ```
 
-### Array template with nested template
+### Nested array template
 
 ```js
 json2json({

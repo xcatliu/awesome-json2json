@@ -161,6 +161,45 @@ describe('json2json', () => {
                 }
             });
         });
+        it('should disable a field if $disable returns true', () => {
+            assert.deepEqual(json2json(FOO_BAR_BAZ, {
+                new_foo: {
+                    $path: 'foo',
+                    new_bar1: {
+                        $disable: (foo) => {
+                            return foo.bar.baz === 1;
+                        },
+                        new_baz: 'bar.baz'
+                    },
+                    new_bar2: 'bar.baz'
+                }
+            }), {
+                new_foo: {
+                    new_bar2: 1
+                }
+            });
+        });
+        it('should not disable a field if $disable returns false', () => {
+            assert.deepEqual(json2json(FOO_BAR_BAZ, {
+                new_foo: {
+                    $path: 'foo',
+                    new_bar1: {
+                        $disable: (foo) => {
+                            return foo.bar.baz !== 1;
+                        },
+                        new_baz: 'bar.baz'
+                    },
+                    new_bar2: 'bar.baz'
+                }
+            }), {
+                new_foo: {
+                    new_bar1: {
+                        new_baz: 1
+                    },
+                    new_bar2: 1
+                }
+            });
+        });
     });
     describe('array template', () => {
         it('should match arrayed result', () => {

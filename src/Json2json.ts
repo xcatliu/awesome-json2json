@@ -1,14 +1,16 @@
-export type Template<T> = IFullTemplate<T> | string | Function;
+export type Template<T = any> = IFullTemplate<T> | string | Function;
 
-export interface IFullTemplate<T> {
+export interface IFullTemplate<T = any> {
     $path?: string;
     $formatting?: Function;
+    $disable?: Function;
     [propName: string]: Template<T>;
 }
 
 export default class Json2json<T> {
     private static PATH_SEPARATOR = '.';
     private static PATH_ROOT = '$root';
+    private static DISABLED_FIELD = '__DISABLED_FIELD__';
     private template: Template<T>;
     private root: any;
     constructor(template: Template<T>) {
@@ -16,13 +18,19 @@ export default class Json2json<T> {
     }
     public map(json: any) {
         this.root = json;
-
         return this.mapChild(json, this.template);
     }
-    private mapChild(json: any, template: Template<T>): T {
+    private mapChild(json: any, template: Template) {
         const fullTemplate = this.getFullTemplate(template);
         let currentJSON = json;
         currentJSON = this.getPropertySafely(currentJSON, fullTemplate.$path);
+
+        if (fullTemplate.$disable) {
+            if (fullTemplate.$disable(currentJSON)) {
+                return Json2json.DISABLED_FIELD;
+            }
+        }
+        
         if (fullTemplate.$formatting) {
             if (/\[\]/.test(fullTemplate.$path)) {
                 currentJSON = currentJSON.map((currentJSONItem) => fullTemplate.$formatting(currentJSONItem));
@@ -40,7 +48,10 @@ export default class Json2json<T> {
             return currentJSON.map((currentJSONItem) => {
                 let result = {};
                 filteredKeys.forEach((key) => {
-                    result[key] = this.mapChild(currentJSONItem, fullTemplate[key]);
+                    const childResult = this.mapChild(currentJSONItem, fullTemplate[key]);
+                    if (childResult !== Json2json.DISABLED_FIELD) {
+                        result[key] = childResult;
+                    }
                 });
                 return result;
             });
@@ -48,14 +59,16 @@ export default class Json2json<T> {
 
         let result = {};
         filteredKeys.forEach((key) => {
-            result[key] = this.mapChild(currentJSON, fullTemplate[key]);
+            const childResult = this.mapChild(currentJSON, fullTemplate[key]);
+            if (childResult !== Json2json.DISABLED_FIELD) {
+                result[key] = childResult;
+            }
         });
-        return (result as T);
+        return result;
     }
-    private getFullTemplate(template: Template<T>) {
-        let fullTemplate: IFullTemplate<T> = {
-            $path: '',
-            $formatting: null
+    private getFullTemplate(template: Template) {
+        let fullTemplate: IFullTemplate = {
+            $path: ''
         };
 
         if (typeof template === 'string') {
