@@ -24,7 +24,7 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 
 ## Template
 
-Template is the structure of your output json, the rule of how to map one json data to another. The syntax should look like this:
+Template is the structure of our output json, and the rule of how to map one json data to another. The syntax should look like this:
 
 ```js
 // Input:
@@ -88,6 +88,8 @@ Template is the structure of your output json, the rule of how to map one json d
 
 ### Optional chaining
 
+Optional chaining is a stage-1 ECMAScript feature, by adding a `?` to the end of one pathItem, it will return undefined if the value is undefined, which will throw an error without optional chaining question mark.
+
 ```js
 json2json({ foo: { bar: { baz: 1 }}}, {
     new_foo: 'foo.not_exist_key?.bar.baz'
@@ -96,6 +98,8 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 ```
 
 ### Function template
+
+By passing a function to the template, the field value will be the return value of the funtion. The first argument of the function is the root of current input json.
 
 ```js
 json2json({ foo: { bar: { baz: 1 }}}, {
@@ -107,6 +111,8 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 ```
 
 ### Template with $path and $formatting
+
+We can combine the above two type of templates into one template item by passing an object to it, with key `$path` and `$formatting`, in this case, the first argument of `$formatting` is the json result which gets from `$path`.
 
 ```js
 json2json({ foo: { bar: { baz: 1 }}}, {
@@ -122,6 +128,8 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 
 ### Nested template
 
+If we pass some keys that are not starts with `$`, then it will return the new structure that contains the keys we pass.
+
 ```js
 json2json({ foo: { bar: { baz: 1 }}}, {
     new_foo: {
@@ -133,6 +141,8 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 ```
 
 ### Nested template with $path and $formatting
+
+`$path`, `$formatting` and nested template can work togather!
 
 ```js
 json2json({ foo: { bar: { baz: 1 }}}, {
@@ -150,6 +160,8 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 ```
 
 ### Nested template with $disable
+
+With `$disable` keyword, we can disable a field when `$disable` returns true.
 
 ```js
 json2json({ foo: { bar: { baz: 1 }}}, {
@@ -172,6 +184,8 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 ```
 
 ### Template with $root
+
+When we reaches the very bottom, it possible to use `$root` to go back to the root of input json.
 
 ```js
 json2json({ foo: { bar: { baz: 1 }}}, {
@@ -197,6 +211,8 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 ```
 
 ### Array template
+
+Map an array is so easy.
 
 ```js
 json2json({
