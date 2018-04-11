@@ -22,6 +22,68 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 // { new_foo: 1 }
 ```
 
+## Template
+
+Template is the structure of your output json, the rule of how to map one json data to another. The syntax should look like this:
+
+```js
+// Input:
+// {
+//     foo: {
+//         bar: {
+//             baz: 1
+//         }
+//     },
+//     foo_array: [
+//         { bar: 1 },
+//         { bar: 2 },
+//         { bar: 3 }
+//     ]
+// }
+//
+// Template example:
+{
+    new_foo1: 'foo.bar.baz',
+    new_foo2: 'foo.not_exist_key?.bar.baz',
+    new_foo3: (root) => { return root.foo.bar.baz; },
+    new_foo4: {
+        $path: 'foo',
+        $formatting: (foo) => { return foo.bar.baz; }
+    },
+    new_foo5: {
+        $path: 'foo',
+        new_bar1: 'bar.baz',
+        new_bar2: '$root.foo.bar.baz',
+        new_bar3: {
+            $formatting: (foo) => { return foo.bar.baz; }
+        },
+        new_bar4: {
+            $disable: (foo) => { return foo.bar.baz === 1; }
+            new_baz: 'foo.bar.baz'
+        },
+    },
+    new_foo_array1: 'foo_array[].bar',
+    new_foo_array2: {
+        $path: 'foo_array[]',
+        $formatting: (foo_item) => { return foo_item.bar; }
+    }
+}
+// Output:
+// {
+//     new_foo1: 1,
+//     new_foo2: undefined,
+//     new_foo3: 1,
+//     new_foo4: 1,
+//     new_foo5: {
+//         new_bar1: 1,
+//         new_bar2: 1,
+//         new_bar3: 1
+//     },
+//     new_foo_array1: [1, 2, 3],
+//     new_foo_array2: [1, 2, 3]
+// }
+```
+
 ## Features
 
 ### Optional chaining
@@ -200,3 +262,35 @@ json2json({
 //     ]
 // }
 ```
+
+### Clear all empty data
+
+Passing `clearEmpty: true` to the third parameter of `json2json` will clear all empty data including `undefined`, `null`, empty object `{}`, empty array `[]`, and combination of empty object and empty array such as `[{}, {}, {}]`
+
+```js
+json2json({
+    foo: [
+        { bar: 1 },
+        { bar: 2 },
+        { bar: 3 }
+    ]
+}, {
+    new_foo: {
+        new_bar1: 'foo[].bar',
+        new_bar2: {
+            $path: 'foo[]',
+            new_baz1: 'baz',
+            new_baz2: {
+                new_qux: 'baz'
+            }
+        }
+    }
+}, {
+    clearEmpty: true
+});
+// {
+//     new_foo: {
+//         new_bar1: [1, 2, 3]
+//     }
+// }
+

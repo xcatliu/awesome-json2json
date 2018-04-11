@@ -1,10 +1,11 @@
-import Json2json, { Template } from './Json2json';
+import Json2json, { Template, IJson2jsonOptions } from './Json2json';
 
-export default function json2json<T>(json: any, template: Template<T>) {
-    const mapper = new Json2json(template);
+export default function json2json<T>(json: any, template: Template<T>, options: IJson2jsonOptions) {
+    const mapper = new Json2json(template, options);
     return mapper.map(json);
 }
 
 export {
-    Template
+    Template,
+    IJson2jsonOptions
 }
