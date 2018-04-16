@@ -1,9 +1,18 @@
-export type Template<T = any> = IFullTemplate<T> | string | Function;
+export interface IFormattingContext {
+    $root: any;
+    $item?: any;
+}
+
+export interface IFormattingFunction {
+    (json: any, context?: IFormattingContext): any;
+}
+
+export type Template<T = any> = IFullTemplate<T> | string | IFormattingFunction;
 
 export interface IFullTemplate<T = any> {
     $path?: string;
-    $formatting?: Function;
-    $disable?: Function;
+    $formatting?: IFormattingFunction;
+    $disable?: IFormattingFunction;
     [propName: string]: Template<T>;
 }
 
@@ -12,8 +21,6 @@ export interface IJson2jsonOptions {
 }
 
 export default class Json2json<T> {
-    private static PATH_SEPARATOR = '.';
-    private static PATH_ROOT = '$root';
     private static DISABLED_FIELD = '__DISABLED_FIELD__';
     public static clearEmpty = (json) => {
         if (
@@ -50,50 +57,61 @@ export default class Json2json<T> {
     }
     public map(json) {
         this.root = json;
-        const result = this.mapChild(json, this.template);
+        const result = this.mapChild(json, this.template, { $root: this.root });
         if (this.options.clearEmpty) {
             return Json2json.clearEmpty(result);
         }
         return result;
     }
-    private mapChild(json, template: Template) {
+    private mapChild(json, template: Template, context: IFormattingContext) {
         const fullTemplate = this.getFullTemplate(template);
         let currentJSON = this.getJSONByPath(json, fullTemplate.$path);
 
         if (fullTemplate.$disable) {
             if (this.isArrayTemplate(fullTemplate)) {
-                currentJSON = currentJSON.filter((currentJSONItem) => !(fullTemplate.$disable(currentJSONItem)));
+                currentJSON = currentJSON.filter((currentJSONItem) => {
+                    return !(fullTemplate.$disable(currentJSONItem, {
+                        ...context,
+                        $item: currentJSONItem
+                    }));
+                });
             } else {
-                if (fullTemplate.$disable(currentJSON)) {
+                if (fullTemplate.$disable(currentJSON, context)) {
                     return Json2json.DISABLED_FIELD;
                 }
             }
         }
 
         if (fullTemplate.$formatting) {
-            currentJSON = this.getFormattedJSON(currentJSON, fullTemplate);
+            if (this.isArrayTemplate(fullTemplate)) {
+                currentJSON = currentJSON.map((currentJSONItem) => {
+                    return fullTemplate.$formatting(currentJSONItem, {
+                        ...context,
+                        $item: currentJSONItem
+                    });
+                });
+            } else {
+                currentJSON = fullTemplate.$formatting(currentJSON, context);
+            }
         }
 
         if (Object.keys(fullTemplate).some((key) => !(/^\$/.test(key)))) {
-            currentJSON = this.getFilteredJSON(currentJSON, fullTemplate);
+            currentJSON = this.getFilteredJSON(currentJSON, fullTemplate, context);
         }
 
         return currentJSON;
     }
-    private getFormattedJSON(currentJSON, fullTemplate: IFullTemplate) {
-        if (this.isArrayTemplate(fullTemplate)) {
-            return currentJSON.map((currentJSONItem) => fullTemplate.$formatting(currentJSONItem));
-        }
-        return fullTemplate.$formatting(currentJSON);
-    }
-    private getFilteredJSON(currentJSON, fullTemplate: IFullTemplate) {
+    private getFilteredJSON(currentJSON, fullTemplate: IFullTemplate, context: IFormattingContext) {
         const filteredKeys = Object.keys(fullTemplate).filter((key) => !(/^\$/.test(key)));
 
         if (this.isArrayTemplate(fullTemplate)) {
             return currentJSON.map((currentJSONItem) => {
                 let result = {};
                 filteredKeys.forEach((key) => {
-                    const childResult = this.mapChild(currentJSONItem, fullTemplate[key]);
+                    const childResult = this.mapChild(currentJSONItem, fullTemplate[key], {
+                        ...context,
+                        $item: currentJSONItem
+                    });
                     if (childResult !== Json2json.DISABLED_FIELD) {
                         result[key] = childResult;
                     }
@@ -104,7 +122,7 @@ export default class Json2json<T> {
 
         let result = {};
         filteredKeys.forEach((key) => {
-            const childResult = this.mapChild(currentJSON, fullTemplate[key]);
+            const childResult = this.mapChild(currentJSON, fullTemplate[key], context);
             if (childResult !== Json2json.DISABLED_FIELD) {
                 result[key] = childResult;
             }
@@ -113,12 +131,12 @@ export default class Json2json<T> {
     }
     // { new_field1: 'field1?.field2?.field3' }
     // Syntax reference https://github.com/tc39/proposal-optional-chaining
-    private getJSONByPath(json, path = '') {
-        if (path === '') return json;
-        const splitedPath = path.split(Json2json.PATH_SEPARATOR);
+    private getJSONByPath(json, path: string | string[]) {
+        if (path === '' || path.length === 0) return json;
+        const splitedPath = Array.isArray(path) ? path.slice() : path.split('.');
         if (splitedPath[0] === '$root') {
             splitedPath.shift();
-            return this.getJSONByPath(this.root, splitedPath.join('.'));
+            return this.getJSONByPath(this.root, splitedPath);
         }
         let result = json;
         while (splitedPath.length > 0) {
@@ -126,9 +144,8 @@ export default class Json2json<T> {
             if (/\[\]$/.test(currentKey)) {
                 currentKey = currentKey.replace(/\[\]$/, '');
                 result = currentKey === '' ? result : result[currentKey];
-                const joinedPath = splitedPath.join('.');
                 return result.map((jsonItem) => {
-                    return this.getJSONByPath(jsonItem, joinedPath);
+                    return this.getJSONByPath(jsonItem, splitedPath);
                 });
             }
             if (/\?$/.test(currentKey)) {

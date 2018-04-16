@@ -62,7 +62,14 @@ describe('json2json', () => {
                 new_foo_array1: 'foo_array[].bar',
                 new_foo_array2: {
                     $path: 'foo_array[]',
-                    $formatting: (foo_item) => { return foo_item.bar; }
+                    $formatting: (fooItem) => { return fooItem.bar; }
+                },
+                new_foo_array3: {
+                    $path: 'foo_array[]',
+                    new_bar: {
+                        $path: 'bar',
+                        $formatting: (barValue, { $item: fooItem }) => barValue + fooItem.bar
+                    }
                 }
             }), {
                 new_foo1: 1,
@@ -75,7 +82,12 @@ describe('json2json', () => {
                     new_bar3: 1
                 },
                 new_foo_array1: [1, 2, 3],
-                new_foo_array2: [1, 2, 3]
+                new_foo_array2: [1, 2, 3],
+                new_foo_array3: [
+                    { new_bar: 2 },
+                    { new_bar: 4 },
+                    { new_bar: 6 }
+                ]
             });
         });
     });
@@ -191,7 +203,7 @@ describe('json2json', () => {
                 }
             });
         });
-        it('should match nested $path and $root template value', () => {
+        it('should match nested $path with $root in template', () => {
             assert.deepEqual(json2json(FOO_BAR_BAZ, {
                 new_foo: {
                     $path: 'foo',
@@ -357,6 +369,150 @@ describe('json2json', () => {
             });
         });
     });
+
+    describe('context in $formatting', () => {
+        it('should have $item context in $formatting argument', () => {
+            assert.deepEqual(json2json(ARRAY_FOO_BAR, {
+                new_foo: {
+                    $path: 'foo[]',
+                    new_bar: {
+                        $path: 'bar',
+                        $formatting: (barValue, { $item: fooItem }) => {
+                            return barValue + '_formatted_' + fooItem.bar;
+                        }
+                    }
+                }
+            }), {
+                new_foo: [
+                    { new_bar: '1_formatted_1' },
+                    { new_bar: '2_formatted_2' },
+                    { new_bar: '3_formatted_3' }
+                ]
+            });
+        });
+        it('should have $root context in $formatting argument', () => {
+            assert.deepEqual(json2json(ARRAY_FOO_BAR, {
+                new_foo: {
+                    $path: 'foo[]',
+                    new_bar1: {
+                        $path: 'bar',
+                        $formatting: (barValue, { $item: fooItem }) => {
+                            return barValue + '_formatted_' + fooItem.bar;
+                        }
+                    },
+                    new_bar2: (fooItem, { $root }) => {
+                        return fooItem.bar + '_formatted_' + $root.foo.length;
+                    }
+                }
+            }), {
+                new_foo: [
+                    {
+                        new_bar1: '1_formatted_1',
+                        new_bar2: '1_formatted_3'
+                    },
+                    {
+                        new_bar1: '2_formatted_2',
+                        new_bar2: '2_formatted_3'
+                    },
+                    {
+                        new_bar1: '3_formatted_3',
+                        new_bar2: '3_formatted_3'
+                    }
+                ]
+            });
+        });
+        it('should have currect $item in deep array', () => {
+            assert.deepEqual(json2json({
+                foo: [
+                    {
+                        bar: [
+                            { baz: 1 },
+                            { baz: 2 },
+                            { baz: 3 }
+                        ]
+                    },
+                    {
+                        bar: [
+                            { baz: 1 },
+                            { baz: 2 },
+                            { baz: 3 }
+                        ]
+                    },
+                    {
+                        bar: [
+                            { baz: 1 },
+                            { baz: 2 },
+                            { baz: 3 }
+                        ]
+                    },
+                ]
+            }, {
+                new_foo: {
+                    $path: 'foo[]',
+                    new_bar: {
+                        $path: 'bar[]',
+                        new_baz: {
+                            $path: 'baz',
+                            $formatting: (bazValue, { $item: barItem }) => {
+                                return bazValue + '_formatted_' + barItem.baz;
+                            }
+                        }
+                    },
+                }
+            }), {
+                new_foo: [
+                    {
+                        new_bar: [
+                            { new_baz: '1_formatted_1' },
+                            { new_baz: '2_formatted_2' },
+                            { new_baz: '3_formatted_3' },
+                        ]
+                    },
+                    {
+                        new_bar: [
+                            { new_baz: '1_formatted_1' },
+                            { new_baz: '2_formatted_2' },
+                            { new_baz: '3_formatted_3' },
+                        ]
+                    },
+                    {
+                        new_bar: [
+                            { new_baz: '1_formatted_1' },
+                            { new_baz: '2_formatted_2' },
+                            { new_baz: '3_formatted_3' },
+                        ]
+                    }
+                ]
+            });
+        });
+        it('should have $item and $root context in $disable argument', () => {
+            assert.deepEqual(json2json(ARRAY_FOO_BAR, {
+                new_foo: {
+                    $path: 'foo[]',
+                    new_bar1: {
+                        $path: 'bar',
+                        $disable: (barValue, { $item: fooItem }) => {
+                            return fooItem.bar === 2;
+                        }
+                    },
+                    new_bar2: {
+                        $disable: (fooItem, { $root }) => {
+                            return fooItem.bar === $root.foo.length;
+                        },
+                        $formatting: (fooItem) => {
+                            return fooItem.bar;
+                        }
+                    }
+                }
+            }), {
+                new_foo: [
+                    { new_bar1: 1, new_bar2: 1 },
+                    { new_bar2: 2 },
+                    { new_bar1: 3 }
+                ]
+            });
+        });
+    });
 });
 
 describe('json2json with clearEmpty option', () => {
@@ -453,4 +609,4 @@ describe('json2json with clearEmpty option', () => {
             }
         });
     });
-})
+});

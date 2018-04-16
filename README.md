@@ -24,7 +24,7 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 
 ## Template
 
-Template is the structure of our output json, and the rule of how to map one json data to another. The syntax should look like this:
+Template is the structure of output json, and the rule of how to map one json data to another. The syntax should look like this:
 
 ```js
 // Input:
@@ -67,6 +67,13 @@ Template is the structure of our output json, and the rule of how to map one jso
         $path: 'foo_array[]',
         $formatting: (foo_item) => { return foo_item.bar; }
     }
+    new_foo_array3: {
+        $path: 'foo_array[]',
+        new_bar: {
+            $path: 'bar',
+            $formatting: (barValue, { $item: fooItem }) => barValue + fooItem.bar
+        }
+    }
 }
 // Output:
 // {
@@ -80,7 +87,12 @@ Template is the structure of our output json, and the rule of how to map one jso
 //         new_bar3: 1
 //     },
 //     new_foo_array1: [1, 2, 3],
-//     new_foo_array2: [1, 2, 3]
+//     new_foo_array2: [1, 2, 3],
+//     new_foo_array3: [
+//         { new_bar: 2 },
+//         { new_bar: 4 },
+//         { new_bar: 6 }
+//     ]
 // }
 ```
 
@@ -275,6 +287,49 @@ json2json({
 //         { new_bar: 1 },
 //         { new_bar: 2 },
 //         { new_bar: 3 }
+//     ]
+// }
+```
+
+### $item and $root inside $formatting
+
+The second parameter of $formatting is the context of current mapping status, including `$item` and `$root`.
+
+```js
+json2json({
+    foo: [
+        { bar: 1 },
+        { bar: 2 },
+        { bar: 3 }
+    ]
+}, {
+    new_foo: {
+        $path: 'foo[]',
+        new_bar1: {
+            $path: 'bar',
+            $formatting: (barValue, { $item: fooItem }) => {
+                return barValue + '_formatted_' + fooItem.bar;
+            }
+        },
+        new_bar2: (fooItem, { $root }) => {
+            return fooItem.bar + '_formatted_' + $root.foo.length;
+        }
+    }
+});
+// {
+//     new_foo: [
+//         {
+//             new_bar1: '1_formatted_1',
+//             new_bar2: '1_formatted_3'
+//         },
+//         {
+//             new_bar1: '2_formatted_2',
+//             new_bar2: '2_formatted_3'
+//         },
+//         {
+//             new_bar1: '3_formatted_3',
+//             new_bar2: '3_formatted_3'
+//         }
 //     ]
 // }
 ```

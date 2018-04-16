@@ -1,16 +1,21 @@
-export declare type Template<T = any> = IFullTemplate<T> | string | Function;
+export interface IFormattingContext {
+    $root: any;
+    $item?: any;
+}
+export interface IFormattingFunction {
+    (json: any, context?: IFormattingContext): any;
+}
+export declare type Template<T = any> = IFullTemplate<T> | string | IFormattingFunction;
 export interface IFullTemplate<T = any> {
     $path?: string;
-    $formatting?: Function;
-    $disable?: Function;
+    $formatting?: IFormattingFunction;
+    $disable?: IFormattingFunction;
     [propName: string]: Template<T>;
 }
 export interface IJson2jsonOptions {
     clearEmpty?: boolean;
 }
 export default class Json2json<T> {
-    private static PATH_SEPARATOR;
-    private static PATH_ROOT;
     private static DISABLED_FIELD;
     static clearEmpty: (json: any) => any;
     private template;
@@ -18,10 +23,9 @@ export default class Json2json<T> {
     private root;
     constructor(template: Template<T>, options?: IJson2jsonOptions);
     map(json: any): any;
-    private mapChild(json, template);
-    private getFormattedJSON(currentJSON, fullTemplate);
-    private getFilteredJSON(currentJSON, fullTemplate);
-    private getJSONByPath(json, path?);
+    private mapChild(json, template, context);
+    private getFilteredJSON(currentJSON, fullTemplate, context);
+    private getJSONByPath(json, path);
     private getFullTemplate(template);
     private isArrayTemplate(template);
 }
