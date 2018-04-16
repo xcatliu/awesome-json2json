@@ -1,6 +1,6 @@
 {
   "name": "awesome-json2json",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "description": "An awesome json to json mapper",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
