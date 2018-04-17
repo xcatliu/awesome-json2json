@@ -10,7 +10,7 @@ export interface IFullTemplate<T = any> {
     $path?: string;
     $formatting?: IFormattingFunction;
     $disable?: IFormattingFunction;
-    [propName: string]: Template<T>;
+    [propName: string]: Template;
 }
 export interface IJson2jsonOptions {
     clearEmpty?: boolean;
