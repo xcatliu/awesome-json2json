@@ -513,6 +513,91 @@ describe('json2json', () => {
             });
         });
     });
+
+    describe('$item in $path', () => {
+        it('should get the $item inside $path', () => {
+            assert.deepEqual(json2json({
+                foo: [
+                    { bar: { baz1: 1, baz2: 2, baz3: 3 }},
+                    { bar: { baz1: 1, baz2: 2, baz3: 3 }},
+                    { bar: { baz1: 1, baz2: 2, baz3: 3 }}
+                ]
+            }, {
+                new_foo: {
+                    $path: 'foo[]',
+                    new_bar: {
+                        $path: 'bar',
+                        new_baz: '$item.bar.baz1'
+                    }
+                }
+            }), {
+                new_foo: [
+                    { new_bar: { new_baz: 1 } },
+                    { new_bar: { new_baz: 1 } },
+                    { new_bar: { new_baz: 1 } },
+                ]
+            });
+        });
+        it('should have currect $item in deep array', () => {
+            assert.deepEqual(json2json({
+                foo: [
+                    {
+                        bar: [
+                            { baz: 1 },
+                            { baz: 2 },
+                            { baz: 3 }
+                        ]
+                    },
+                    {
+                        bar: [
+                            { baz: 1 },
+                            { baz: 2 },
+                            { baz: 3 }
+                        ]
+                    },
+                    {
+                        bar: [
+                            { baz: 1 },
+                            { baz: 2 },
+                            { baz: 3 }
+                        ]
+                    },
+                ]
+            }, {
+                new_foo: {
+                    $path: 'foo[]',
+                    new_bar: {
+                        $path: 'bar[]',
+                        new_baz: '$item.baz'
+                    },
+                }
+            }), {
+                new_foo: [
+                    {
+                        new_bar: [
+                            { new_baz: 1 },
+                            { new_baz: 2 },
+                            { new_baz: 3 },
+                        ]
+                    },
+                    {
+                        new_bar: [
+                            { new_baz: 1 },
+                            { new_baz: 2 },
+                            { new_baz: 3 },
+                        ]
+                    },
+                    {
+                        new_bar: [
+                            { new_baz: 1 },
+                            { new_baz: 2 },
+                            { new_baz: 3 },
+                        ]
+                    },
+                ]
+            });
+        });
+    });
 });
 
 describe('json2json with clearEmpty option', () => {

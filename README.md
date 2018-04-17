@@ -334,6 +334,35 @@ json2json({
 // }
 ```
 
+### Template with $item
+
+`item` represents the current array item.
+
+```js
+json2json({
+    foo: [
+        { bar: { baz1: 1, baz2: 2, baz3: 3 }},
+        { bar: { baz1: 1, baz2: 2, baz3: 3 }},
+        { bar: { baz1: 1, baz2: 2, baz3: 3 }}
+    ]
+}, {
+    new_foo: {
+        $path: 'foo[]',
+        new_bar: {
+            $path: 'bar',
+            new_baz: '$item.bar.baz1'
+        }
+    }
+});
+// {
+//     new_foo: [
+//         { new_bar: { new_baz: 1 } },
+//         { new_bar: { new_baz: 1 } },
+//         { new_bar: { new_baz: 1 } },
+//     ]
+// }
+```
+
 ### Clear all empty data
 
 Passing `clearEmpty: true` to the third parameter of `json2json` will clear all empty data including `undefined`, `null`, empty object `{}`, empty array `[]`, and combination of empty object and empty array such as `[{}, {}, {}]`

@@ -65,7 +65,7 @@ export default class Json2json<T> {
     }
     private mapChild(json, template: Template, context: IFormattingContext) {
         const fullTemplate = this.getFullTemplate(template);
-        let currentJSON = this.getJSONByPath(json, fullTemplate.$path);
+        let currentJSON = this.getJSONByPath(json, fullTemplate.$path, context);
 
         if (fullTemplate.$disable) {
             if (this.isArrayTemplate(fullTemplate)) {
@@ -131,12 +131,16 @@ export default class Json2json<T> {
     }
     // { new_field1: 'field1?.field2?.field3' }
     // Syntax reference https://github.com/tc39/proposal-optional-chaining
-    private getJSONByPath(json, path: string | string[]) {
+    private getJSONByPath(json, path: string | string[], context: IFormattingContext) {
         if (path === '' || path.length === 0) return json;
         const splitedPath = Array.isArray(path) ? path.slice() : path.split('.');
         if (splitedPath[0] === '$root') {
             splitedPath.shift();
-            return this.getJSONByPath(this.root, splitedPath);
+            return this.getJSONByPath(this.root, splitedPath, context);
+        }
+        if (splitedPath[0] === '$item') {
+            splitedPath.shift();
+            return this.getJSONByPath(context.$item, splitedPath, context);
         }
         let result = json;
         while (splitedPath.length > 0) {
@@ -145,7 +149,10 @@ export default class Json2json<T> {
                 currentKey = currentKey.replace(/\[\]$/, '');
                 result = currentKey === '' ? result : result[currentKey];
                 return result.map((jsonItem) => {
-                    return this.getJSONByPath(jsonItem, splitedPath);
+                    return this.getJSONByPath(jsonItem, splitedPath, {
+                        ...context,
+                        $item: jsonItem
+                    });
                 });
             }
             if (/\?$/.test(currentKey)) {
