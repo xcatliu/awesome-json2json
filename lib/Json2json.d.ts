@@ -1,15 +1,8 @@
-export interface IFormattingContext {
-    $root: any;
-    $item?: any;
-}
-export interface IFormattingFunction {
-    (json: any, context?: IFormattingContext): any;
-}
-export declare type Template<T = any> = IFullTemplate<T> | string | IFormattingFunction;
+export declare type Template<T = any> = IFullTemplate<T> | string | Function;
 export interface IFullTemplate<T = any> {
     $path?: string;
-    $formatting?: IFormattingFunction;
-    $disable?: IFormattingFunction;
+    $formatting?: Function;
+    $disable?: Function;
     [propName: string]: Template;
 }
 export interface IJson2jsonOptions {

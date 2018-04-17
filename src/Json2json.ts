@@ -1,18 +1,14 @@
-export interface IFormattingContext {
+interface IContext {
     $root: any;
     $item?: any;
 }
 
-export interface IFormattingFunction {
-    (json: any, context?: IFormattingContext): any;
-}
-
-export type Template<T = any> = IFullTemplate<T> | string | IFormattingFunction;
+export type Template<T = any> = IFullTemplate<T> | string | Function;
 
 export interface IFullTemplate<T = any> {
     $path?: string;
-    $formatting?: IFormattingFunction;
-    $disable?: IFormattingFunction;
+    $formatting?: Function;
+    $disable?: Function;
     [propName: string]: Template;
 }
 
@@ -63,7 +59,7 @@ export default class Json2json<T> {
         }
         return result;
     }
-    private mapChild(json, template: Template, context: IFormattingContext) {
+    private mapChild(json, template: Template, context: IContext) {
         const fullTemplate = this.getFullTemplate(template);
         let currentJSON = this.getJSONByPath(json, fullTemplate.$path, context);
 
@@ -101,7 +97,7 @@ export default class Json2json<T> {
 
         return currentJSON;
     }
-    private getFilteredJSON(currentJSON, fullTemplate: IFullTemplate, context: IFormattingContext) {
+    private getFilteredJSON(currentJSON, fullTemplate: IFullTemplate, context: IContext) {
         const filteredKeys = Object.keys(fullTemplate).filter((key) => !(/^\$/.test(key)));
 
         if (this.isArrayTemplate(fullTemplate)) {
@@ -131,7 +127,7 @@ export default class Json2json<T> {
     }
     // { new_field1: 'field1?.field2?.field3' }
     // Syntax reference https://github.com/tc39/proposal-optional-chaining
-    private getJSONByPath(json, path: string | string[], context: IFormattingContext) {
+    private getJSONByPath(json, path: string | string[], context: IContext) {
         if (path === '' || path.length === 0) return json;
         const splitedPath = Array.isArray(path) ? path.slice() : path.split('.');
         if (splitedPath[0] === '$root') {
