@@ -512,6 +512,32 @@ describe('json2json', () => {
                 ]
             });
         });
+        it('should support optional array', () => {
+            assert.deepEqual(json2json(ARRAY_FOO_BAR, {
+                new_foo: {
+                    $path: 'not_exist_array?[]',
+                    new_bar: 'bar'
+                }
+            }), {
+                new_foo: []
+            });
+        });
+        // it('should have $index context in $formatting argument', () => {
+        //     assert.deepEqual(json2json(ARRAY_FOO_BAR, {
+        //         new_foo: {
+        //             $path: 'foo[].bar',
+        //             new_bar: (barValue, { $index, $root }) => {
+        //                 return barValue + '_formatted_' + $root.foo[$index].bar;
+        //             }
+        //         }
+        //     }), {
+        //         new_foo: [
+        //             { new_bar: '1_formatted_1' },
+        //             { new_bar: '2_formatted_2' },
+        //             { new_bar: '3_formatted_3' }
+        //         ]
+        //     });
+        // });
     });
 
     describe('$item in $path', () => {

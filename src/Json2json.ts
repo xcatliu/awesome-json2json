@@ -143,6 +143,12 @@ export default class Json2json<T> {
             let currentKey = splitedPath.shift();
             if (/\[\]$/.test(currentKey)) {
                 currentKey = currentKey.replace(/\[\]$/, '');
+                if (/\?$/.test(currentKey)) {
+                    currentKey = currentKey.replace(/\?$/, '');
+                    if (result[currentKey] === undefined) {
+                        return [];
+                    }
+                }
                 result = currentKey === '' ? result : result[currentKey];
                 return result.map((jsonItem) => {
                     return this.getJSONByPath(jsonItem, splitedPath, {
