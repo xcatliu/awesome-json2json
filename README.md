@@ -16,9 +16,13 @@ npm install awesome-json2json --save
 import json2json from 'awesome-json2json';
 // const json2json = require('awesome-json2json').default;
 
-json2json({ foo: { bar: { baz: 1 }}}, {
+let sourceJson = { foo: { bar: { baz: 1 }}};
+
+let template = {
     new_foo: 'foo.bar.baz'
-});
+};
+
+json2json(sourceJson, template);
 // { new_foo: 1 }
 ```
 
