@@ -92,10 +92,10 @@ export default class Json2json<T> {
         }
 
         if (Object.keys(fullTemplate).some((key) => !(/^\$/.test(key)))) {
-            currentJSON = this.getFilteredJSON(currentJSON, fullTemplate, context);
+            return this.getFilteredJSON(currentJSON, fullTemplate, context);
+        } else {
+            return currentJSON;
         }
-
-        return currentJSON;
     }
     private getFilteredJSON(currentJSON, fullTemplate: IFullTemplate, context: IContext) {
         const filteredKeys = Object.keys(fullTemplate).filter((key) => !(/^\$/.test(key)));

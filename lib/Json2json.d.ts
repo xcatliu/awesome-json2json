@@ -16,9 +16,9 @@ export default class Json2json<T> {
     private root;
     constructor(template: Template<T>, options?: IJson2jsonOptions);
     map(json: any): any;
-    private mapChild(json, template, context);
-    private getFilteredJSON(currentJSON, fullTemplate, context);
-    private getJSONByPath(json, path, context);
-    private getFullTemplate(template);
-    private isArrayTemplate(template);
+    private mapChild;
+    private getFilteredJSON;
+    private getJSONByPath;
+    private getFullTemplate;
+    private isArrayTemplate;
 }
