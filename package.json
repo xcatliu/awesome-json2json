@@ -1,6 +1,6 @@
 {
   "name": "awesome-json2json",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "An awesome json to json mapper",
   "main": "./lib/index.js",
   "types": "./lib/index.d.ts",
@@ -9,6 +9,7 @@
     "build": "npm run build:ts",
     "build:ts": "tsc --declaration",
     "build:ts:watch": "tsc --declaration --watch",
+    "pretest": "npm run build:ts",
     "test": "mocha"
   },
   "repository": {

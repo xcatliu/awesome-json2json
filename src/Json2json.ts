@@ -1,6 +1,7 @@
 interface IContext {
     $root: any;
     $item?: any;
+    $index?: any;
 }
 
 export type Template<T = any> = IFullTemplate<T> | string | Function;
@@ -101,16 +102,19 @@ export default class Json2json<T> {
         const filteredKeys = Object.keys(fullTemplate).filter((key) => !(/^\$/.test(key)));
 
         if (this.isArrayTemplate(fullTemplate)) {
+            let index = 0;
             return currentJSON.map((currentJSONItem) => {
                 let result = {};
                 filteredKeys.forEach((key) => {
                     const childResult = this.mapChild(currentJSONItem, fullTemplate[key], {
                         ...context,
-                        $item: currentJSONItem
+                        $item: currentJSONItem,
+                        $index: index
                     });
                     if (childResult !== Json2json.DISABLED_FIELD) {
                         result[key] = childResult;
                     }
+                    index += 1;
                 });
                 return result;
             });
