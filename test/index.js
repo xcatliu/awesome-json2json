@@ -370,6 +370,50 @@ describe('json2json', () => {
         });
     });
 
+    describe('defaulting values', () => {
+        it('should use $default as for value when no value is found', () => {
+            assert.deepEqual(json2json(ARRAY_FOO_BAR, {
+                new_foo: {
+                    $path: 'foo[]',
+                    new_bar: {
+                        $path: 'bar',
+                        $formatting: (barValue, { $item: fooItem }) => {
+                            return barValue + '_formatted_' + fooItem.bar;
+                        }
+                    },
+                    notThere: { $default: 'defaulted-value' }
+                },
+            }), {
+                new_foo: [
+                    { new_bar: '1_formatted_1', notThere: 'defaulted-value' },
+                    { new_bar: '2_formatted_2', notThere: 'defaulted-value' },
+                    { new_bar: '3_formatted_3', notThere: 'defaulted-value' }
+                ]
+            });
+        });
+
+        it('should use call $default for a value if $default is a function', () => {
+            assert.deepEqual(json2json(ARRAY_FOO_BAR, {
+                new_foo: {
+                    $path: 'foo[]',
+                    new_bar: {
+                        $path: 'bar',
+                        $formatting: (barValue, { $item: fooItem }) => {
+                            return barValue + '_formatted_' + fooItem.bar;
+                        }
+                    },
+                    notThere: { $default: () => 'defaulted-value' }
+                },
+            }), {
+                new_foo: [
+                    { new_bar: '1_formatted_1', notThere: 'defaulted-value' },
+                    { new_bar: '2_formatted_2', notThere: 'defaulted-value' },
+                    { new_bar: '3_formatted_3', notThere: 'defaulted-value' }
+                ]
+            });
+        });
+    });
+
     describe('context in $formatting', () => {
         it('should have $item context in $formatting argument', () => {
             assert.deepEqual(json2json(ARRAY_FOO_BAR, {

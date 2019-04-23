@@ -3,6 +3,7 @@ export interface IFullTemplate<T = any> {
     $path?: string;
     $formatting?: Function;
     $disable?: Function;
+    $default?: any;
     [propName: string]: Template;
 }
 export interface IJson2jsonOptions {
