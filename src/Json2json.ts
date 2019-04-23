@@ -10,6 +10,7 @@ export interface IFullTemplate<T = any> {
     $path?: string;
     $formatting?: Function;
     $disable?: Function;
+    $default?: any;
     [propName: string]: Template;
 }
 
@@ -77,6 +78,16 @@ export default class Json2json<T> {
                     return Json2json.DISABLED_FIELD;
                 }
             }
+        }
+
+        if (!fullTemplate.$formatting && fullTemplate.$default) {
+            const $func = typeof fullTemplate.$default === 'function'
+                ? fullTemplate.$default
+                : () => fullTemplate.$default;
+
+            fullTemplate.$formatting = val => (typeof val === 'undefined')
+                ? $func()
+                : val;
         }
 
         if (fullTemplate.$formatting) {

@@ -370,6 +370,59 @@ describe('json2json', () => {
         });
     });
 
+    describe('defaulting values', () => {
+        it('should use the real value if it present, and the default if not', () => {
+            assert.deepEqual(
+                json2json(FOO_BAR_BAZ, {
+                    foobared: {
+                        $path: 'foo.bar',
+                        bazed: { $path: 'baz', $default: 1111 },
+                        defaulted_value: { $path: 'defaulted', $default: 4 },
+                        defaulted_func: { $path: 'anotherdefaulted', $default: () => 88 },
+                        defaulted_obj: {
+                            $path: 'does_not_exist',
+                            $default: {},
+                            nested_default: { $path: 'still_not_there', $default: 99 }
+                        }
+                    },
+                    zilch: {
+                        $path: 'foo.bar.zilch',
+                        $default: 123,
+                        $formatting: () => 456,
+                    }
+                }),
+                {
+                    foobared: {
+                        bazed: 1,
+                        defaulted_value: 4,
+                        defaulted_func: 88,
+                        defaulted_obj: {
+                            nested_default: 99,
+                        }
+                    },
+                    zilch: 456
+                }
+            )
+        });
+        it('should be able to do the example frome the readme', () => {
+            const result = json2json({ foo: { bar: 1 }}, {
+                new_foo: {
+                    $path: 'foo',
+                    new_bar: { $path: 'bar', $default: 11 },
+                    new_baz: { $path: 'baz', $default: 9 },
+                    new_qux: { $path: 'qux', $default: () => 88 }
+                }
+            });
+
+            assert.deepEqual(
+                result,
+                {
+                    new_foo: { new_bar: 1, new_baz: 9, new_qux: 88 }
+                }
+            )
+        });
+    });
+
     describe('context in $formatting', () => {
         it('should have $item context in $formatting argument', () => {
             assert.deepEqual(json2json(ARRAY_FOO_BAR, {
