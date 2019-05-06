@@ -31,7 +31,7 @@
   },
   "homepage": "https://github.com/xcatliu/awesome-json2json#readme",
   "devDependencies": {
-    "mocha": "^5.0.5",
-    "typescript": "^2.8.1"
+    "mocha": "^6.1.4",
+    "typescript": "^3.4.5"
   }
 }
