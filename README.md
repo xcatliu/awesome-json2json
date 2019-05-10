@@ -1,6 +1,6 @@
 # Awesome json2json
 
-[![Build Status](https://img.shields.io/travis/xcatliu/awesome-json2json.svg)](https://travis-ci.org/xcatliu/awesome-json2json) [![npm package](https://img.shields.io/npm/v/awesome-json2json.svg)](https://www.npmjs.org/package/awesome-json2json) [![npm downloads](http://img.shields.io/npm/dm/awesome-json2json.svg)](https://www.npmjs.org/package/awesome-json2json) 
+[![Build Status](https://img.shields.io/travis/xcatliu/awesome-json2json.svg)](https://travis-ci.org/xcatliu/awesome-json2json) [![npm package](https://img.shields.io/npm/v/awesome-json2json.svg)](https://www.npmjs.org/package/awesome-json2json) [![npm downloads](http://img.shields.io/npm/dm/awesome-json2json.svg)](https://www.npmjs.org/package/awesome-json2json)
 
 An awesome json to json mapper
 
@@ -14,7 +14,7 @@ npm install awesome-json2json --save
 
 ```js
 import json2json from 'awesome-json2json';
-// const json2json = require('awesome-json2json').default;
+// const { default: json2json } = require('awesome-json2json');
 
 let sourceJson = { foo: { bar: { baz: 1 }}};
 
@@ -192,9 +192,31 @@ json2json({ foo: { bar: { baz: 1 }}}, {
         new_bar2: 'bar.baz'
     }
 });
-// {                
+// {
 //     new_foo: {
 //         new_bar2: 1
+//     }
+// }
+```
+
+### Nested template with $default
+
+With `$default` keyword, we can provide a default value when a field returns `undefined`.
+
+```js
+json2json({ foo: { bar: 1 }}, {
+    new_foo: {
+        $path: 'foo',
+        new_bar: { $path: 'bar', $default: 11 },
+        new_baz: { $path: 'baz', $default: 9 },
+        new_qux: { $path: 'qux', $default: () => 88 }
+    }
+});
+// {
+//     new_foo: {
+//         new_bar: 1
+//         new_baz: 9,
+//         new_qux: 88,
 //     }
 // }
 ```
