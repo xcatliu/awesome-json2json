@@ -144,18 +144,22 @@ export default class Json2json<T> {
     // Syntax reference https://github.com/tc39/proposal-optional-chaining
     private getJSONByPath(json, path: string | string[], context: IContext) {
         if (path === '' || path.length === 0) return json;
-        const splitedPath = Array.isArray(path) ? path.slice() : path.split('.');
-        if (splitedPath[0] === '$root') {
-            splitedPath.shift();
-            return this.getJSONByPath(this.root, splitedPath, context);
+        const splitPath = Array.isArray(path) ? path.slice() : path.split('.');
+        if (splitPath[0] === '$root') {
+            splitPath.shift();
+            return this.getJSONByPath(this.root, splitPath, context);
         }
-        if (splitedPath[0] === '$item') {
-            splitedPath.shift();
-            return this.getJSONByPath(context.$item, splitedPath, context);
+        if (splitPath[0] === '$item') {
+            splitPath.shift();
+            return this.getJSONByPath(context.$item, splitPath, context);
         }
         let result = json;
-        while (splitedPath.length > 0) {
-            let currentKey = splitedPath.shift();
+        while (splitPath.length > 0) {
+            let currentKey = splitPath.shift();
+            if (currentKey === '$head') {
+                result = (result && result[0]) ? result[0] : null;
+                continue;
+            }
             if (/\[\]$/.test(currentKey)) {
                 currentKey = currentKey.replace(/\[\]$/, '');
                 if (/\?$/.test(currentKey)) {
@@ -166,7 +170,7 @@ export default class Json2json<T> {
                 }
                 result = currentKey === '' ? result : result[currentKey];
                 return result.map((jsonItem) => {
-                    return this.getJSONByPath(jsonItem, splitedPath, {
+                    return this.getJSONByPath(jsonItem, splitPath, {
                         ...context,
                         $item: jsonItem
                     });

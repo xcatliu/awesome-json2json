@@ -26,7 +26,7 @@ const ARRAY_FOO_BAR_BAZ = {
 }
 
 describe('json2json', () => {
-    describe('complexty example', () => {
+    describe('complexity example', () => {
         it('should match', () => {
             assert.deepEqual(json2json({
                 foo: {
@@ -474,7 +474,7 @@ describe('json2json', () => {
                 ]
             });
         });
-        it('should have currect $item in deep array', () => {
+        it('should have correct $item in deep array', () => {
             assert.deepEqual(json2json({
                 foo: [
                     {
@@ -594,6 +594,37 @@ describe('json2json', () => {
         });
     });
 
+    describe('$head in the path', () => {
+        it('should be able to get the first element of an array with $head', () => {
+            assert.deepEqual(
+                json2json({ baz: ['a', 'b', 'c'] }, { head: 'baz.$head' }),
+                { head: 'a' },
+            );
+        });
+
+        it('should work when $head is used in the middle of a path', ()  =>  {
+            assert.deepEqual(
+                json2json(
+                    { foo: [{ bar: 1 }, { bar: 2 }] },
+                    { first_bar: 'foo.$head.bar' }
+                ),
+                { first_bar: 1 },
+            );
+        });
+
+        it('should work when used with ?.', ()  =>  {
+            assert.deepEqual(
+                json2json({ foo: { bar: [ { not_baz: 1 }] } }, { head: 'foo.bar.$head?.baz' }),
+                { head: undefined },
+            );
+
+            assert.deepEqual(
+                json2json({ foo: {  } }, { head: 'foo.bar?.$head?.baz' }),
+                { head: undefined },
+            );
+        });
+    });
+
     describe('$item in $path', () => {
         it('should get the $item inside $path', () => {
             assert.deepEqual(json2json({
@@ -618,7 +649,7 @@ describe('json2json', () => {
                 ]
             });
         });
-        it('should have currect $item in deep array', () => {
+        it('should have correct $item in deep array', () => {
             assert.deepEqual(json2json({
                 foo: [
                     {
