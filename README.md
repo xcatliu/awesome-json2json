@@ -389,6 +389,18 @@ json2json({
 // }
 ```
 
+### Using only the head of an Array
+
+If you need to work with just a the first element of an array you can use `$head` in the path to access it.
+
+```js
+json2json(
+    { foo: [{ bar: 1 }, { bar: 2 }] },
+    { first_bar: 'foo.$head.bar' }
+);
+// { first_bar: 1 }
+```
+
 ### Clear all empty data
 
 Passing `clearEmpty: true` to the third parameter of `json2json` will clear all empty data including `undefined`, `null`, empty object `{}`, empty array `[]`, and combination of empty object and empty array such as `[{}, {}, {}]`
