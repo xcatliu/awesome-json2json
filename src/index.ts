@@ -1,8 +1,8 @@
-import Json2json, { Template, IJson2jsonOptions } from './Json2json';
+import Json2json, { Template, Json2jsonOptions } from './Json2json';
 
-export default function json2json<T>(json: any, template: Template<T>, options: IJson2jsonOptions = {}) {
-  const mapper = new Json2json(template, options);
-  return mapper.map(json);
+export default function json2json(json: any, template: Template, options: Json2jsonOptions = {}) {
+  const json2jsonInstance = new Json2json(template, options);
+  return json2jsonInstance.transform(json);
 }
 
-export { Template, IJson2jsonOptions };
+export { Template, Json2jsonOptions };

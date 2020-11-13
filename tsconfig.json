@@ -10,6 +10,8 @@
     "sourceMap": true,
     // 生成的文件的换行符
     "newLine": "lf",
+    // 严格模式
+    // "strict": true,
 
     // 构建结果的目录
     "outDir": "lib"

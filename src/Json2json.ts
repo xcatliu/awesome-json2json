@@ -1,12 +1,12 @@
-interface IContext {
+interface Context {
   $root: any;
   $item?: any;
   $index?: any;
 }
 
-export type Template<T = any> = IFullTemplate<T> | string | Function;
+export type Template = FullTemplate | string | Function;
 
-export interface IFullTemplate<T = any> {
+interface FullTemplate {
   $path?: string;
   $formatting?: Function;
   $disable?: Function;
@@ -14,14 +14,14 @@ export interface IFullTemplate<T = any> {
   [propName: string]: Template;
 }
 
-export interface IJson2jsonOptions {
+export interface Json2jsonOptions {
   clearEmpty?: boolean;
 }
 
-export default class Json2json<T> {
+export default class Json2json {
   private static DISABLED_FIELD = '__DISABLED_FIELD__';
   public static clearEmpty = (json) => {
-    if (json === undefined || json === null) {
+    if (typeof json === 'undefined' || json === null) {
       return undefined;
     }
     if (Array.isArray(json)) {
@@ -32,7 +32,7 @@ export default class Json2json<T> {
     if (typeof json === 'object') {
       const clearedJSON = Object.keys(json).reduce((prev, key) => {
         const clearedJSONItem = Json2json.clearEmpty(json[key]);
-        if (clearedJSONItem === undefined) return prev;
+        if (typeof clearedJSONItem === 'undefined') return prev;
         return {
           ...prev,
           [key]: clearedJSONItem,
@@ -43,22 +43,22 @@ export default class Json2json<T> {
     }
     return json;
   };
-  private template: Template<T>;
-  private options: IJson2jsonOptions;
+  private template: Template;
+  private options: Json2jsonOptions;
   private root;
-  public constructor(template: Template<T>, options: IJson2jsonOptions = {}) {
+  public constructor(template: Template, options: Json2jsonOptions = {}) {
     this.template = template;
     this.options = options;
   }
-  public map(json) {
+  public transform(json) {
     this.root = json;
-    const result = this.mapChild(json, this.template, { $root: this.root });
+    const result = this.transformChild(json, this.template, { $root: this.root });
     if (this.options.clearEmpty) {
       return Json2json.clearEmpty(result);
     }
     return result;
   }
-  private mapChild(json, template: Template, context: IContext) {
+  private transformChild(json, template: Template, context: Context) {
     const fullTemplate = this.getFullTemplate(template);
     let currentJSON = this.getJSONByPath(json, fullTemplate.$path, context);
 
@@ -78,9 +78,10 @@ export default class Json2json<T> {
     }
 
     if (!fullTemplate.$formatting && fullTemplate.$default) {
-      const $func = typeof fullTemplate.$default === 'function' ? fullTemplate.$default : () => fullTemplate.$default;
+      const defaultFunction =
+        typeof fullTemplate.$default === 'function' ? fullTemplate.$default : () => fullTemplate.$default;
 
-      fullTemplate.$formatting = (val) => (typeof val === 'undefined' ? $func() : val);
+      fullTemplate.$formatting = (val) => (typeof val === 'undefined' ? defaultFunction() : val);
     }
 
     if (fullTemplate.$formatting) {
@@ -102,7 +103,7 @@ export default class Json2json<T> {
       return currentJSON;
     }
   }
-  private getFilteredJSON(currentJSON, fullTemplate: IFullTemplate, context: IContext) {
+  private getFilteredJSON(currentJSON, fullTemplate: FullTemplate, context: Context) {
     const filteredKeys = Object.keys(fullTemplate).filter((key) => !/^\$/.test(key));
 
     if (this.isArrayTemplate(fullTemplate)) {
@@ -110,7 +111,7 @@ export default class Json2json<T> {
       return currentJSON.map((currentJSONItem) => {
         let result = {};
         filteredKeys.forEach((key) => {
-          const childResult = this.mapChild(currentJSONItem, fullTemplate[key], {
+          const childResult = this.transformChild(currentJSONItem, fullTemplate[key], {
             ...context,
             $item: currentJSONItem,
             $index: index,
@@ -126,7 +127,7 @@ export default class Json2json<T> {
 
     let result = {};
     filteredKeys.forEach((key) => {
-      const childResult = this.mapChild(currentJSON, fullTemplate[key], context);
+      const childResult = this.transformChild(currentJSON, fullTemplate[key], context);
       if (childResult !== Json2json.DISABLED_FIELD) {
         result[key] = childResult;
       }
@@ -135,7 +136,7 @@ export default class Json2json<T> {
   }
   // { new_field1: 'field1?.field2?.field3' }
   // Syntax reference https://github.com/tc39/proposal-optional-chaining
-  private getJSONByPath(json, path: string | string[], context: IContext) {
+  private getJSONByPath(json, path: string | string[], context: Context) {
     if (path === '' || path.length === 0) return json;
     const splitPath = Array.isArray(path) ? path.slice() : path.split('.');
     if (splitPath[0] === '$root') {
@@ -150,14 +151,14 @@ export default class Json2json<T> {
     while (splitPath.length > 0) {
       let currentKey = splitPath.shift();
       if (currentKey === '$head') {
-        result = result?.[0] ?? null;
+        result = result[0] ?? null;
         continue;
       }
       if (/\[\]$/.test(currentKey)) {
         currentKey = currentKey.replace(/\[\]$/, '');
         if (/\?$/.test(currentKey)) {
           currentKey = currentKey.replace(/\?$/, '');
-          if (result[currentKey] === undefined) {
+          if (typeof result[currentKey] === 'undefined') {
             return [];
           }
         }
@@ -171,7 +172,7 @@ export default class Json2json<T> {
       }
       if (/\?$/.test(currentKey)) {
         currentKey = currentKey.replace(/\?$/, '');
-        if (result[currentKey] === undefined) {
+        if (typeof result[currentKey] === 'undefined') {
           return undefined;
         }
       }
@@ -180,7 +181,7 @@ export default class Json2json<T> {
     return result;
   }
   private getFullTemplate(template: Template) {
-    let fullTemplate: IFullTemplate = {
+    let fullTemplate: FullTemplate = {
       $path: '',
     };
 
@@ -197,7 +198,7 @@ export default class Json2json<T> {
 
     return fullTemplate;
   }
-  private isArrayTemplate(template: IFullTemplate) {
+  private isArrayTemplate(template: FullTemplate) {
     return /\[\]/.test(template.$path);
   }
 }
