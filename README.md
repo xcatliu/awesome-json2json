@@ -1,6 +1,6 @@
 # Awesome json2json
 
-[![Build Status](https://img.shields.io/travis/xcatliu/awesome-json2json.svg)](https://travis-ci.org/xcatliu/awesome-json2json) [![npm package](https://img.shields.io/npm/v/awesome-json2json.svg)](https://www.npmjs.org/package/awesome-json2json) [![npm downloads](http://img.shields.io/npm/dm/awesome-json2json.svg)](https://www.npmjs.org/package/awesome-json2json)
+[![Actions Status](https://github.com/xcatliu/awesome-json2json/workflows/test/badge.svg)](https://github.com/xcatliu/awesome-json2json/actions) [![npm package](https://img.shields.io/npm/v/awesome-json2json.svg)](https://www.npmjs.org/package/awesome-json2json) [![npm downloads](http://img.shields.io/npm/dm/awesome-json2json.svg)](https://www.npmjs.org/package/awesome-json2json)
 
 An awesome json to json mapper
 
@@ -16,10 +16,10 @@ npm install awesome-json2json --save
 import json2json from 'awesome-json2json';
 // const { default: json2json } = require('awesome-json2json');
 
-let sourceJson = { foo: { bar: { baz: 1 }}};
+let sourceJson = { foo: { bar: { baz: 1 } } };
 
 let template = {
-    new_foo: 'foo.bar.baz'
+  new_foo: 'foo.bar.baz',
 };
 
 json2json(sourceJson, template);
@@ -33,70 +33,70 @@ Template is the structure of output json, and the rule of how to map one json da
 ```js
 // Input:
 // {
-//     foo: {
-//         bar: {
-//             baz: 1
-//         }
-//     },
-//     foo_array: [
-//         { bar: 1 },
-//         { bar: 2 },
-//         { bar: 3 }
-//     ]
+//   foo: {
+//     bar: {
+//       baz: 1
+//     }
+//   },
+//   foo_array: [
+//     { bar: 1 },
+//     { bar: 2 },
+//     { bar: 3 }
+//   ]
 // }
 //
 // Template example:
 {
-    new_foo1: 'foo.bar.baz',
-    new_foo2: 'foo.not_exist_key?.bar.baz',
-    new_foo3: (root) => { return root.foo.bar.baz; },
-    new_foo4: {
-        $path: 'foo',
-        $formatting: (foo) => { return foo.bar.baz; }
+  new_foo1: 'foo.bar.baz',
+  new_foo2: 'foo.not_exist_key?.bar.baz',
+  new_foo3: (root) => { return root.foo.bar.baz; },
+  new_foo4: {
+    $path: 'foo',
+    $formatting: (foo) => { return foo.bar.baz; }
+  },
+  new_foo5: {
+    $path: 'foo',
+    new_bar1: 'bar.baz',
+    new_bar2: '$root.foo.bar.baz',
+    new_bar3: {
+      $formatting: (foo) => { return foo.bar.baz; }
     },
-    new_foo5: {
-        $path: 'foo',
-        new_bar1: 'bar.baz',
-        new_bar2: '$root.foo.bar.baz',
-        new_bar3: {
-            $formatting: (foo) => { return foo.bar.baz; }
-        },
-        new_bar4: {
-            $disable: (foo) => { return foo.bar.baz === 1; }
-            new_baz: 'foo.bar.baz'
-        },
+    new_bar4: {
+      $disable: (foo) => { return foo.bar.baz === 1; }
+      new_baz: 'foo.bar.baz'
     },
-    new_foo_array1: 'foo_array[].bar',
-    new_foo_array2: {
-        $path: 'foo_array[]',
-        $formatting: (foo_item) => { return foo_item.bar; }
+  },
+  new_foo_array1: 'foo_array[].bar',
+  new_foo_array2: {
+    $path: 'foo_array[]',
+    $formatting: (foo_item) => { return foo_item.bar; }
+  }
+  new_foo_array3: {
+    $path: 'foo_array[]',
+    new_bar: {
+      $path: 'bar',
+      $formatting: (barValue, { $item: fooItem }) => barValue + fooItem.bar
     }
-    new_foo_array3: {
-        $path: 'foo_array[]',
-        new_bar: {
-            $path: 'bar',
-            $formatting: (barValue, { $item: fooItem }) => barValue + fooItem.bar
-        }
-    }
+  }
 }
 // Output:
 // {
-//     new_foo1: 1,
-//     new_foo2: undefined,
-//     new_foo3: 1,
-//     new_foo4: 1,
-//     new_foo5: {
-//         new_bar1: 1,
-//         new_bar2: 1,
-//         new_bar3: 1
-//     },
-//     new_foo_array1: [1, 2, 3],
-//     new_foo_array2: [1, 2, 3],
-//     new_foo_array3: [
-//         { new_bar: 2 },
-//         { new_bar: 4 },
-//         { new_bar: 6 }
-//     ]
+//   new_foo1: 1,
+//   new_foo2: undefined,
+//   new_foo3: 1,
+//   new_foo4: 1,
+//   new_foo5: {
+//     new_bar1: 1,
+//     new_bar2: 1,
+//     new_bar3: 1
+//   },
+//   new_foo_array1: [1, 2, 3],
+//   new_foo_array2: [1, 2, 3],
+//   new_foo_array3: [
+//     { new_bar: 2 },
+//     { new_bar: 4 },
+//     { new_bar: 6 }
+//   ]
 // }
 ```
 
@@ -107,9 +107,12 @@ Template is the structure of output json, and the rule of how to map one json da
 Optional chaining is a [stage-1 ECMAScript feature](https://github.com/tc39/proposal-optional-chaining), by adding a `?` to the end of one pathItem, it will return `undefined` if the value is `undefined`. As a comparison, it will throw an error without optional chaining question mark.
 
 ```js
-json2json({ foo: { bar: { baz: 1 }}}, {
-    new_foo: 'foo.not_exist_key?.bar.baz'
-});
+json2json(
+  { foo: { bar: { baz: 1 } } },
+  {
+    new_foo: 'foo.not_exist_key?.bar.baz',
+  },
+);
 // { new_foo: undefined }
 ```
 
@@ -118,11 +121,14 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 By passing a function to the template, the field value will be the return value of the funtion. The first argument of the function is the root of current input json.
 
 ```js
-json2json({ foo: { bar: { baz: 1 }}}, {
+json2json(
+  { foo: { bar: { baz: 1 } } },
+  {
     new_foo: (root) => {
-        return root.foo.bar.baz + '_formatted';
-    }
-});
+      return root.foo.bar.baz + '_formatted';
+    },
+  },
+);
 // { new_foo: '1_formatted' }
 ```
 
@@ -131,14 +137,17 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 We can combine the above two type of templates into one template item by passing an object to it, with key `$path` and `$formatting`, in this case, the first argument of `$formatting` is the json result which gets from `$path`.
 
 ```js
-json2json({ foo: { bar: { baz: 1 }}}, {
+json2json(
+  { foo: { bar: { baz: 1 } } },
+  {
     new_foo: {
-        $path: 'foo.bar',
-        $formatting: (bar) => {
-            return bar.baz + '_formatted';
-        }
-    }
-});
+      $path: 'foo.bar',
+      $formatting: (bar) => {
+        return bar.baz + '_formatted';
+      },
+    },
+  },
+);
 // { new_foo: '1_formatted' }
 ```
 
@@ -147,12 +156,15 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 If we pass some keys that are not starts with `$`, then it will return the new structure that contains the keys we pass.
 
 ```js
-json2json({ foo: { bar: { baz: 1 }}}, {
+json2json(
+  { foo: { bar: { baz: 1 } } },
+  {
     new_foo: {
-        $path: 'foo',
-        new_bar: 'bar.baz'
-    }
-});
+      $path: 'foo',
+      new_bar: 'bar.baz',
+    },
+  },
+);
 // { new_foo: { new_bar: 1 }}
 ```
 
@@ -161,90 +173,102 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 `$path`, `$formatting` and nested template can work togather!
 
 ```js
-json2json({ foo: { bar: { baz: 1 }}}, {
+json2json(
+  { foo: { bar: { baz: 1 } } },
+  {
     new_foo: {
-        $path: 'foo',
-        $formatting: (foo) => {
-            return {
-                baz2: foo.bar.baz + '_formatted'
-            }
-        },
-        new_bar: 'baz2'
-    }
-});
+      $path: 'foo',
+      $formatting: (foo) => {
+        return {
+          baz2: foo.bar.baz + '_formatted',
+        };
+      },
+      new_bar: 'baz2',
+    },
+  },
+);
 // { new_foo: { new_bar: '1_formatted' }}
 ```
 
-### Nested template with $disable
+### Nested template with \$disable
 
 With `$disable` keyword, we can disable a field when `$disable` returns true.
 
 ```js
-json2json({ foo: { bar: { baz: 1 }}}, {
+json2json(
+  { foo: { bar: { baz: 1 } } },
+  {
     new_foo: {
-        $path: 'foo',
-        new_bar1: {
-            $disable: (foo) => {
-                return foo.bar.baz === 1;
-            },
-            new_baz: 'bar.baz'
+      $path: 'foo',
+      new_bar1: {
+        $disable: (foo) => {
+          return foo.bar.baz === 1;
         },
-        new_bar2: 'bar.baz'
-    }
-});
+        new_baz: 'bar.baz',
+      },
+      new_bar2: 'bar.baz',
+    },
+  },
+);
 // {
-//     new_foo: {
-//         new_bar2: 1
-//     }
+//   new_foo: {
+//     new_bar2: 1
+//   }
 // }
 ```
 
-### Nested template with $default
+### Nested template with \$default
 
 With `$default` keyword, we can provide a default value when a field returns `undefined`.
 
 ```js
-json2json({ foo: { bar: 1 }}, {
+json2json(
+  { foo: { bar: 1 } },
+  {
     new_foo: {
-        $path: 'foo',
-        new_bar: { $path: 'bar', $default: 11 },
-        new_baz: { $path: 'baz', $default: 9 },
-        new_qux: { $path: 'qux', $default: () => 88 }
-    }
-});
+      $path: 'foo',
+      new_bar: { $path: 'bar', $default: 11 },
+      new_baz: { $path: 'baz', $default: 9 },
+      new_qux: { $path: 'qux', $default: () => 88 },
+    },
+  },
+);
 // {
-//     new_foo: {
-//         new_bar: 1
-//         new_baz: 9,
-//         new_qux: 88,
-//     }
+//   new_foo: {
+//     new_bar: 1
+//     new_baz: 9,
+//     new_qux: 88,
+//   }
 // }
 ```
 
-### Template with $root
+### Template with \$root
 
 When we reaches the very bottom, it possible to use `$root` to go back to the root of input json.
 
 ```js
-json2json({ foo: { bar: { baz: 1 }}}, {
+json2json(
+  { foo: { bar: { baz: 1 } } },
+  {
     new_foo: {
-        $path: 'foo',
-        new_bar: {
-            $path: 'bar',
-            new_baz1: 'baz',
-            new_baz2: '$root.foo'
-        }
-    }
-});
+      $path: 'foo',
+      new_bar: {
+        $path: 'bar',
+        new_baz1: 'baz',
+        new_baz2: '$root.foo',
+      },
+    },
+  },
+);
 // new_foo: {
-//     new_bar: {
-//         new_baz1: 1,
-//         new_baz2: {
-//             bar: {
-//                 baz: 1
-//             }
-//         }
+//   new_bar: {
+//     new_baz1: 1,
+//     new_baz2: {
+//       bar: {
+//         baz: 1
+//       }
 //     }
+//   }
 // }
 ```
 
@@ -253,139 +277,138 @@ json2json({ foo: { bar: { baz: 1 }}}, {
 Map an array is so easy.
 
 ```js
-json2json({
-    foo: [
-        { bar: 1 },
-        { bar: 2 },
-        { bar: 3 }
-    ]
-}, {
-    new_foo: 'foo[].bar'
-});
+json2json(
+  {
+    foo: [{ bar: 1 }, { bar: 2 }, { bar: 3 }],
+  },
+  {
+    new_foo: 'foo[].bar',
+  },
+);
 // { new_foo: [1, 2, 3] }
 ```
 
-### Array template with $formatting
+### Array template with \$formatting
 
 ```js
-json2json({
-    foo: [
-        { bar: 1 },
-        { bar: 2 },
-        { bar: 3 }
-    ]
-}, {
+json2json(
+  {
+    foo: [{ bar: 1 }, { bar: 2 }, { bar: 3 }],
+  },
+  {
     new_foo: {
-        $path: 'foo[].bar',
-        $formatting: (barValue) => barValue + '_formatted'
-    }
-});
+      $path: 'foo[].bar',
+      $formatting: (barValue) => barValue + '_formatted',
+    },
+  },
+);
 // {
-//     new_foo: [
-//         '1_formatted',
-//         '2_formatted',
-//         '3_formatted'
-//     ]
+//   new_foo: [
+//     '1_formatted',
+//     '2_formatted',
+//     '3_formatted'
+//   ]
 // }
 ```
 
 ### Nested array template
 
 ```js
-json2json({
-    foo: [
-        { bar: 1 },
-        { bar: 2 },
-        { bar: 3 }
-    ]
-}, {
+json2json(
+  {
+    foo: [{ bar: 1 }, { bar: 2 }, { bar: 3 }],
+  },
+  {
     new_foo: {
-        $path: 'foo[]',
-        new_bar: {
-            $formatting: (fooItem) => {
-                return fooItem.bar;
-            }
-        }
-    }
-});
+      $path: 'foo[]',
+      new_bar: {
+        $formatting: (fooItem) => {
+          return fooItem.bar;
+        },
+      },
+    },
+  },
+);
 // {
-//     new_foo: [
-//         { new_bar: 1 },
-//         { new_bar: 2 },
-//         { new_bar: 3 }
-//     ]
+//   new_foo: [
+//     { new_bar: 1 },
+//     { new_bar: 2 },
+//     { new_bar: 3 }
+//   ]
 // }
 ```
 
-### $item and $root inside $formatting
+### $item and $root inside \$formatting
 
-The second parameter of $formatting is the context of current mapping status, including `$item` and `$root`.
+The second parameter of \$formatting is the context of current mapping status, including `$item` and `$root`.
 
 ```js
-json2json({
-    foo: [
-        { bar: 1 },
-        { bar: 2 },
-        { bar: 3 }
-    ]
-}, {
+json2json(
+  {
+    foo: [{ bar: 1 }, { bar: 2 }, { bar: 3 }],
+  },
+  {
     new_foo: {
-        $path: 'foo[]',
-        new_bar1: {
-            $path: 'bar',
-            $formatting: (barValue, { $item: fooItem }) => {
-                return barValue + '_formatted_' + fooItem.bar;
-            }
+      $path: 'foo[]',
+      new_bar1: {
+        $path: 'bar',
+        $formatting: (barValue, { $item: fooItem }) => {
+          return barValue + '_formatted_' + fooItem.bar;
         },
-        new_bar2: (fooItem, { $root }) => {
-            return fooItem.bar + '_formatted_' + $root.foo.length;
-        }
-    }
-});
+      },
+      new_bar2: (fooItem, { $root }) => {
+        return fooItem.bar + '_formatted_' + $root.foo.length;
+      },
+    },
+  },
+);
 // {
-//     new_foo: [
-//         {
-//             new_bar1: '1_formatted_1',
-//             new_bar2: '1_formatted_3'
-//         },
-//         {
-//             new_bar1: '2_formatted_2',
-//             new_bar2: '2_formatted_3'
-//         },
-//         {
-//             new_bar1: '3_formatted_3',
-//             new_bar2: '3_formatted_3'
-//         }
-//     ]
+//   new_foo: [
+//     {
+//       new_bar1: '1_formatted_1',
+//       new_bar2: '1_formatted_3'
+//     },
+//     {
+//       new_bar1: '2_formatted_2',
+//       new_bar2: '2_formatted_3'
+//     },
+//     {
+//       new_bar1: '3_formatted_3',
+//       new_bar2: '3_formatted_3'
+//     }
+//   ]
 // }
 ```
 
-### Template with $item
+### Template with \$item
 
 `item` represents the current array item.
 
 ```js
-json2json({
+json2json(
+  {
     foo: [
-        { bar: { baz1: 1, baz2: 2, baz3: 3 }},
-        { bar: { baz1: 1, baz2: 2, baz3: 3 }},
-        { bar: { baz1: 1, baz2: 2, baz3: 3 }}
-    ]
-}, {
+      { bar: { baz1: 1, baz2: 2, baz3: 3 } },
+      { bar: { baz1: 1, baz2: 2, baz3: 3 } },
+      { bar: { baz1: 1, baz2: 2, baz3: 3 } },
+    ],
+  },
+  {
     new_foo: {
-        $path: 'foo[]',
-        new_bar: {
-            $path: 'bar',
-            new_baz: '$item.bar.baz1'
-        }
-    }
-});
+      $path: 'foo[]',
+      new_bar: {
+        $path: 'bar',
+        new_baz: '$item.bar.baz1',
+      },
+    },
+  },
+);
 // {
-//     new_foo: [
-//         { new_bar: { new_baz: 1 } },
-//         { new_bar: { new_baz: 1 } },
-//         { new_bar: { new_baz: 1 } },
-//     ]
+//   new_foo: [
+//     { new_bar: { new_baz: 1 } },
+//     { new_bar: { new_baz: 1 } },
+//     { new_bar: { new_baz: 1 } },
+//   ]
 // }
 ```
 
@@ -394,10 +417,7 @@ json2json({
 If you need to work with just a the first element of an array you can use `$head` in the path to access it.
 
 ```js
-json2json(
-    { foo: [{ bar: 1 }, { bar: 2 }] },
-    { first_bar: 'foo.$head.bar' }
-);
+json2json({ foo: [{ bar: 1 }, { bar: 2 }] }, { first_bar: 'foo.$head.bar' });
 // { first_bar: 1 }
 ```
 
@@ -406,29 +426,29 @@ json2json(
 Passing `clearEmpty: true` to the third parameter of `json2json` will clear all empty data including `undefined`, `null`, empty object `{}`, empty array `[]`, and combination of empty object and empty array such as `[{}, {}, {}]`
 
 ```js
-json2json({
-    foo: [
-        { bar: 1 },
-        { bar: 2 },
-        { bar: 3 }
-    ]
-}, {
+json2json(
+  {
+    foo: [{ bar: 1 }, { bar: 2 }, { bar: 3 }],
+  },
+  {
     new_foo: {
-        new_bar1: 'foo[].bar',
-        new_bar2: {
-            $path: 'foo[]',
-            new_baz1: 'baz',
-            new_baz2: {
-                new_qux: 'baz'
-            }
-        }
-    }
-}, {
-    clearEmpty: true
-});
+      new_bar1: 'foo[].bar',
+      new_bar2: {
+        $path: 'foo[]',
+        new_baz1: 'baz',
+        new_baz2: {
+          new_qux: 'baz',
+        },
+      },
+    },
+  },
+  {
+    clearEmpty: true,
+  },
+);
 // {
-//     new_foo: {
-//         new_bar1: [1, 2, 3]
-//     }
+//   new_foo: {
+//     new_bar1: [1, 2, 3]
+//   }
 // }
-
+```

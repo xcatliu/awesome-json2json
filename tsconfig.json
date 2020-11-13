@@ -1,14 +1,19 @@
 {
-    "compilerOptions": {
-        "sourceMap": true,
-        // 是否允许推断为 any 类型
-        "noImplicitAny": false,
-        "module": "commonjs",
-        "target": "es5",
-        "jsx": "react",
-        "outDir": "lib"
-    },
-    "include": [
-        "src/**/*"
-    ]
+  "compilerOptions": {
+    // 是否允许推断为 any 类型
+    "noImplicitAny": false,
+    // 指定生成文件的 ECMAScript 版本
+    "target": "es5",
+    // 指定生成哪个模块系统代码
+    "module": "commonjs",
+    // 生成相应的 .map文件
+    "sourceMap": true,
+    // 生成的文件的换行符
+    "newLine": "lf",
+
+    // 构建结果的目录
+    "outDir": "lib"
+  },
+  "exclude": ["node_modules"],
+  "include": ["src/**/*.ts"]
 }

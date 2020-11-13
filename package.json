@@ -10,7 +10,13 @@
     "build:ts": "tsc --declaration",
     "build:ts:watch": "tsc --declaration --watch",
     "pretest": "npm run build:ts",
-    "test": "mocha"
+    "test": "npm run lint && mocha",
+    "lint": "npm run eslint && npm run prettier",
+    "lint:fix": "npm run eslint:fix && npm run prettier:fix",
+    "eslint": "eslint --ext .js,.ts .",
+    "eslint:fix": "eslint --ext .js,.ts --fix .",
+    "prettier": "prettier -l \"./**/*.{js,ts,json}\"",
+    "prettier:fix": "prettier --write -l \"./**/*.{js,ts,json}\""
   },
   "repository": {
     "type": "git",
@@ -31,7 +37,12 @@
   },
   "homepage": "https://github.com/xcatliu/awesome-json2json#readme",
   "devDependencies": {
-    "mocha": "^5.0.5",
-    "typescript": "^2.8.1"
+    "@typescript-eslint/eslint-plugin": "^4.7.0",
+    "@typescript-eslint/parser": "^4.7.0",
+    "eslint": "^7.13.0",
+    "eslint-config-alloy": "^3.8.2",
+    "mocha": "^8.2.1",
+    "prettier": "^2.1.2",
+    "typescript": "^4.0.5"
   }
 }

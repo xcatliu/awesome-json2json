@@ -1,0 +1,23 @@
+name: test
+
+on: [push, pull_request]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup node
+        uses: actions/setup-node@v2-beta
+        with:
+          node-version: '12'
+
+      - name: Install
+        run: npm install
+
+      - name: Build
+        run: npm run build
+
+      - name: Run tests
+        run: npm test
