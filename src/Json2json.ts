@@ -1,15 +1,18 @@
-interface Context {
+export interface Context {
   $root: any;
   $item?: any;
   $index?: any;
 }
 
-export type Template = FullTemplate | string | Function;
+export type FormattingFunction = (val: any, context?: Context) => any;
+export type DisableFunction = (val: any, context?: Context) => boolean;
 
-interface FullTemplate {
+export type Template = FullTemplate | string | FormattingFunction;
+
+export interface FullTemplate {
   $path?: string;
-  $formatting?: Function;
-  $disable?: Function;
+  $formatting?: FormattingFunction;
+  $disable?: DisableFunction;
   $default?: any;
   [propName: string]: Template;
 }
