@@ -26,6 +26,16 @@ json2json(sourceJson, template);
 // { new_foo: 1 }
 ```
 
+## Type inference
+
+awesome-json2json now support type inference!
+
+<img width="465" src="./type_inference.png" alt="type_inference" />
+
+If `$path` contains `[]`, then template should be followed with `as const`:
+
+<img width="465" src="./type_inference_2.png" alt="type_inference_2" />
+
 ## Template
 
 Template is the structure of output json, and the rule of how to map one json data to another. The syntax should look like this:
