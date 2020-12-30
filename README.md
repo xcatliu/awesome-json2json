@@ -28,11 +28,11 @@ json2json(sourceJson, template);
 
 ## Type inference
 
-awesome-json2json now support type inference!
+**awesome-json2json now support type inference!**
 
 <img width="465" src="./type_inference.png" alt="type_inference" />
 
-If `$path` contains `[]`, then template should be followed with `as const`:
+If `$path` contains `[]`, the second parameter must be followed with `as const`:
 
 <img width="465" src="./type_inference_2.png" alt="type_inference_2" />
 
